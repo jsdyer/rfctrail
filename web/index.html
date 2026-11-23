@@ -1,34 +1,13 @@
 <!doctype html>
-<html lang="en-CA">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="{{DESCRIPTION}}">
-  <title>{{TITLE}} · CoolCode</title>
-  <link rel="stylesheet" href="./style.css">
-  <script type="module" src="./app.mjs"></script>
-  {{VISIT_COUNTER}}
-</head>
-<body data-tool-id="{{TOOL_ID}}">
-  <a class="skip" href="#main">Skip to content</a>
-  <header><a href="https://coolcode.ca/">← CoolCode.ca</a><a href="{{SOURCE_URL}}">Source &amp; instructions ↗</a></header>
-  <main id="main">
-    <p class="eyebrow">Browser tool starter</p>
-    <h1>{{TITLE}}</h1>
-    <p class="intro">{{DESCRIPTION}}</p>
-    <section aria-labelledby="example-title">
-      <h2 id="example-title">Clean a list</h2>
-      <p>Trim spaces, skip blank lines and remove exact duplicates. Capitalization stays distinct.</p>
-      <div class="panels">
-        <div><label for="input">Your lines</label><textarea id="input" rows="10" maxlength="100000" spellcheck="false" placeholder="Paste one item per line"></textarea></div>
-        <div><label for="output">Cleaned lines</label><textarea id="output" rows="10" readonly spellcheck="false"></textarea></div>
-      </div>
-      <div class="actions"><button id="sample" type="button">Load example</button><button id="clear" type="button">Clear</button><button id="copy" type="button" hidden>Copy result</button></div>
-      <p id="status" role="status" aria-live="polite">Paste a list to begin.</p>
-      <noscript><p>This tool needs JavaScript to process your text. The source is available above.</p></noscript>
-    </section>
-    <aside aria-label="Privacy"><strong>Stays on your device.</strong> The browser processes your text in this tab. Reloading clears it.</aside>
-  </main>
-  <footer>Part of <a href="https://coolcode.ca/">the CoolCode collection</a>. {{ISSUE_LINK}}</footer>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="{{DESCRIPTION}}"><title>{{TITLE}} · CoolCode</title><link rel="canonical" href="https://coolcode.ca/{{TOOL_ID}}/"><link rel="stylesheet" href="./style.css">{{VISIT_COUNTER}}<script type="module" src="./app.mjs"></script></head>
+<body><a class="skip" href="#explore">Skip to the catalogue</a><header><a class="brand" href="https://coolcode.ca/">CoolCode<span>NETWORK HISTORY</span></a><nav><a href="#method">Sources & method</a><a href="{{SOURCE_URL}}">Source code</a></nav></header>
+<main><section class="hero"><div><p class="eyebrow">THE INTERNET HAS A PAPER TRAIL</p><h1>RFC <em>Trail.</em></h1><p class="lead">Every protocol has a past.<br>Follow what changed.</p><p class="intro">Search the specifications that shaped the Internet. Trace their updates, replacements and original drafts.</p><a class="hero-link" href="#explore">Explore the record</a></div><div class="hero-art" aria-hidden="true"><div class="route-line"></div><span class="art-node a">2616 <small>HTTP / 1999</small></span><span class="art-node b">7230 <small>HTTP / 2014</small></span><span class="art-node c">9110 <small>HTTP / 2022</small></span><p>Ideas evolve.<br>The record remains.</p></div></section>
+<div class="edition"><strong>RFC EDITOR / FULL INDEX</strong><span id="summary">Opening the retained index…</span><a href="#captures">Dated captures</a></div>
+<section id="explore" class="explore"><div class="section-heading"><div><p class="eyebrow">READ BETWEEN THE VERSIONS</p><h2>Find a starting point.</h2></div><button id="export" class="secondary" disabled>Export results CSV</button></div>
+<form id="filters"><div class="filter-grid"><label class="query">RFC number, title, keyword or author<input id="query" type="search" placeholder="Try 9110, DNS, TLS or Mockapetris" autocomplete="off"></label><label>Current status<select id="status-filter"><option value="">All statuses</option></select></label><label>Publication stream<select id="stream"><option value="">All streams</option></select></label><label>From year<input id="from" type="number" min="1900" max="2200" placeholder="Any"></label><label>Through year<input id="to" type="number" min="1900" max="2200" placeholder="Any"></label><label>Order<select id="sort"><option value="newest">Newest publication</option><option value="oldest">Oldest publication</option><option value="number">RFC number</option></select></label></div><div id="presets" class="presets" aria-label="Starting searches"></div></form>
+<p id="status" class="status" role="status" aria-live="polite">Searches stay in this tab. No query is sent to the IETF.</p>
+<div class="workspace"><aside class="list-panel"><div class="list-heading"><strong id="result-count">Preparing the index</strong><button class="text-button" id="clear">Clear filters</button></div><div id="results" class="results"></div><p id="empty" hidden>No matching records. Try fewer words or clear the filters.</p><div class="pagination"><button id="prev" class="secondary" disabled>Previous</button><span id="page-label"></span><button id="next" class="secondary" disabled>Next</button></div></aside>
+<article id="record" class="record"><div class="record-top"><p id="record-number" class="eyebrow">SELECT A DOCUMENT</p><span id="record-state" class="pill"></span></div><h2 id="record-title">An idea, in context.</h2><p id="record-meta" class="record-meta"></p><dl id="facts"></dl><div id="links" class="source-links"></div><div id="draft" class="draft"></div><div class="trail-heading"><div><p class="eyebrow">FOLLOW THE RELATIONSHIPS</p><h3>Before. After. Alongside.</h3></div><button id="save" class="secondary" disabled>Save trail JSON</button></div><p class="explain">An update changes part of another RFC. Obsoletes indicates replacement; it does not by itself mean the protocol is unused or unsafe.</p><div class="relationship-map"><svg id="relationship-map" viewBox="0 0 620 260" role="img" aria-label="Direct RFC relationships"></svg><p id="map-note" class="small"></p></div><div id="relations" class="relations"></div>
+<div class="trail-controls"><label>Trail depth<select id="depth"><option value="1">Direct connections</option><option value="2">Two connections</option><option value="3">Three connections</option></select></label><label>Relationship<select id="kind"><option value="all">Updates & replacements</option><option value="obsoletes">Replacements only</option><option value="updates">Updates only</option></select></label></div><p id="trail-status" class="small"></p><div id="timeline" class="timeline" aria-label="Connected RFCs by publication month"></div></article></div></section>
+<section id="captures" class="capture-section"><div><p class="eyebrow">A RECORD OF THE RECORD</p><h2>Compare captures.</h2><p>Published RFCs are linked here by the metadata in a dated index. Later captures can reveal changed statuses and relationships.</p></div><div><label>Catalogue capture<select id="capture"></select></label><p id="capture-note"></p><div id="changes"></div><p class="small">An absent entry means it is absent from that captured index. It does not establish that an RFC was withdrawn. Publication dates retain the source’s month precision; the collector does not invent exact days.</p></div></section>
+<section id="method" class="method"><p class="eyebrow">SOURCES & INTERPRETATION</p><h2>The series is bigger than standards.</h2><div class="method-grid"><div><h3>Read the status</h3><p>RFCs include Internet Standards, Proposed Standards, Best Current Practices, Informational and Experimental documents, Historic material and older records with unknown status. A high RFC number is not a quality rating. Publication and current status can differ.</p><p>The trail shows formal update/replacement relationships, not every citation or every idea that influenced a document. A linked draft is the precursor named by the RFC Editor; complete draft revisions and process history live in the Datatracker.</p></div><div><h3>Search locally</h3><p>Your searches, filters and downloads stay in this tab. The page loads a published metadata snapshot from CoolCode. Opening an official record contacts its publisher. No API key or account is required.</p><p>Weekly collection retains eight changed editions by default. A successful check can find no changes. Failed checks preserve the last good index; check the dates above.</p></div><div><h3>Follow the originals</h3><ul><li><a href="https://www.rfc-editor.org/rfc-index.xml">RFC Editor metadata index</a></li><li><a href="https://www.ietf.org/process/rfcs/">IETF: RFCs and their statuses</a></li><li><a href="https://datatracker.ietf.org/api/">Datatracker API documentation</a></li><li><a href="https://trustee.ietf.org/documents/trust-legal-provisions/">IETF Trust legal provisions</a></li></ul><p>RFC titles and metadata: RFC Editor / IETF. This is an independent explorer, not an official IETF service.</p></div></div></section></main><footer><a href="https://coolcode.ca/">CoolCode</a><a href="https://coolcode.ca/apiarchaeology/">API Archaeology</a><a href="https://coolcode.ca/packagepulse/">Package Pulse</a>{{ISSUE_LINK}}<a href="{{SOURCE_URL}}">GitHub</a></footer></body></html>

@@ -1,16 +1,24 @@
 {
-  "id": "coolcode-tool-template",
-  "title": "CoolCode Tool Starter",
-  "description": "A browser-only example that trims lines and removes exact duplicates.",
-  "category": "security",
-  "tags": ["text", "lines", "duplicates"],
-  "icon": "scan-search",
-  "url": "/coolcode-tool-template/",
-  "source": "https://github.com/jsdyer/coolcode-tool-template",
+  "id": "rfctrail",
+  "title": "RFC Trail",
+  "description": "Follow Internet specifications through their updates, replacements and publication history.",
+  "category": "projects",
+  "tags": [
+    "RFC",
+    "standards",
+    "IETF",
+    "protocols",
+    "history",
+    "networking"
+  ],
+  "icon": "network",
+  "url": "/rfctrail/",
+  "source": "https://github.com/jsdyer/rfctrail",
   "hosting": "project",
   "access": "browser",
   "data_info": {
-    "mode": "local",
-    "detail": "The browser reads the text you paste and compares its lines."
+    "mode": "snapshot",
+    "detail": "The full RFC Editor metadata index, retained weekly for local search and relationship comparisons.",
+    "cadence": "Weekly"
   }
 }

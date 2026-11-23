@@ -1,116 +1,57 @@
-# CoolCode browser tool template
+# RFC Trail
 
-A starting point for independent tools at `coolcode.ca/<repo>/`: a working local-text
-example, responsive UI, Python standard-library build, Node tests, PR checks and Pages
-publication. No npm install is needed.
+A browser explorer for the Internet's specifications: search the complete retained RFC Editor metadata index, follow updates and replacements, inspect original draft links, and compare dated index captures.
 
-## Using the example
+**Public app:** https://coolcode.ca/rfctrail/
 
 <!-- coolcode:guide -->
-The first occurrence of each trimmed line keeps its place. Compare the output with the original text before copying the result.
+Search **9110** for HTTP Semantics, **DNS** for a topic, or an author's name. Select an RFC, then follow **Obsoletes**, **Obsoleted by**, **Updates** and **Updated by**. The timeline is ordered by publication month, not by the date a status changed. Extend the trail to two or three connections to inspect a wider family. RFC status and replacement are separate facts: an obsolete document is not automatically Historic, and not every RFC is a standard. Save trail JSON or export filtered CSV to retain the evidence. A first capture establishes the baseline; later changed index captures enable comparisons.
 <!-- /coolcode:guide -->
 
-For a real tool, replace this paragraph with one or two plain-text sentences
-about an example, a limit or how to interpret the results. Keep the source,
-coverage, refresh behaviour and a worked example in this README as appropriate.
-When updating a tool, revise any details its behaviour has changed and keep the
-homepage's shorter data-source sentence in `tool.json` accurate.
-The hub imports the marked note into the catalogue README.
+## What is included
 
-## One-time template setup
+- The official RFC Editor XML index, including all published `rfc-entry` records, rather than a fixed list of example specifications.
+- Exact RFC-number search; text search across titles, authors, keywords, working-group acronyms, subseries and original draft names.
+- Current-status, stream and publication-year filters; pagination and optional topic presets.
+- Directed update/replacement relationships, including inverse fields. Repeated declarations are deduplicated. Missing referenced records remain explicit gaps.
+- An interactive direct-relationship diagram and a bounded one-to-three-connection trail with a publication timeline, source details, original draft and official Datatracker history links.
+- Dated captures, metadata changes, full search-result CSV and selected-trail JSON.
 
-Enable **Settings → General → Template repository** here. This repository does not
-need Pages enabled: its workflow builds/tests but intentionally skips deployment.
-New copies also skip deployment until `scripts/init.py` sets the tool ID to match
-their repository name. This lets you create the repo before configuring Pages.
+The bundled first capture contains **9,868 RFC entries**, retrieved **23 November 2026**. These are real source records. Publication dates are reported at month precision; the source includes a February 1968 date for RFC 31, which is retained without editorial correction. This metadata index is not the full RFC text, a complete citation graph, or a mirror of every Internet-Draft revision.
 
-## Start a new tool
+## Sources and use
 
-1. Select **Use this template → Create a new repository**, choose owner `jsdyer`,
-   a unique lowercase name such as `my-tool`, and public visibility.
-2. Clone the new repository. Use Python 3.12+ and Node 24+.
-3. Set the identity, using a slug that matches the repository name:
+- [RFC Editor XML index](https://www.rfc-editor.org/rfc-index.xml) is the authoritative source for the metadata and relations used here.
+- [IETF open records](https://www.ietf.org/about/open-records/) documents public data access.
+- [IETF RFC overview](https://www.ietf.org/process/rfcs/) explains statuses, publication streams, updates and obsolescence.
+- [Datatracker API documentation](https://datatracker.ietf.org/api/) confirms public read-only access and a simplified document API without a key. This app links to Datatracker records; it does not request each one per visitor.
+- [IETF Trust legal provisions](https://trustee.ietf.org/documents/trust-legal-provisions/) apply to source material. RFC titles and metadata are attributed to RFC Editor / IETF. This is an independent, unaffiliated explorer; source documents remain authoritative.
 
-```sh
-python3 scripts/init.py my-tool --title "My Tool" --description "Describe what this tool does."
+The official index returned `Access-Control-Allow-Origin: *` during source verification, but this app uses a retained compact copy rather than downloading the full XML for every visitor. No registration or API key is required. Searches and exports run locally. Only first-party app/data files are loaded; opening an official link contacts its publisher. Inputs are not stored in local storage.
+
+## Expand or customize
+
+Edit [`web/config.json`](web/config.json). The full index is already searchable; presets only provide starting points. For example, append this to `presets`:
+
+```json
+{"label":"IPv6", "query":"IPv6", "rfc":8200}
 ```
 
-Review the category, tags and icon in `tool.json`. `access: "browser"` tells the main
-catalogue that the tool works immediately without installation. `--owner` supports a different
-GitHub owner, but only projects owned by `jsdyer` inherit the CoolCode domain.
+`defaultRfc` selects the initial document. `pageSize` controls result pagination (1–100). `maximumTrailNodes` bounds graph exploration (1–300; default 80). These are performance limits, not coverage limits. `retainedCaptures` controls retained changed index editions (1–52; default 8). `minimumRecords`, `maximumRecords`, `maximumSourceBytes` and `maximumDropFraction` protect against truncated or malformed source responses. The current producer deliberately accepts only the documented official `sourceUrl`; a new source needs an explicit parser/validation change.
 
-4. Replace the example in `web/` and its tests. Update the privacy explanation,
-   source attribution and README to describe the real tool.
-5. Test and preview:
+A normal push rebuilds the bundled data offline. To collect new metadata after changing collection settings, run **RFC Trail · Capture, check and publish → Run workflow**, leaving **Refresh the official index** checked. The same workflow refreshes on Mondays at **11:47 UTC**. It makes one bounded source request, validates the full index, then stages the result atomically. Failed requests or validation preserve the previous good data. Unchanged XML updates `checkedAt` without creating a redundant capture; changed XML creates a new compressed capture. GitHub schedules can be delayed.
+
+Local refresh and verification:
 
 ```sh
+python3 scripts/refresh.py
 node --test tests/*.test.mjs
 python3 -m unittest discover -s tests -v
 python3 scripts/build.py
-python3 -m http.server 8000 --directory dist
 ```
 
-Open `http://localhost:8000/`. The example trims lines, skips blanks and removes exact
-duplicates, preserving first-seen order and capitalization. It processes the text in tab memory. Update that explanation if your app behaves differently.
+For reproducible parser work, `python3 scripts/refresh.py --source-file /path/to/rfc-index.xml` processes a saved official download. The resulting timestamp records the import time; the XML source digest identifies the exact bytes. `web/data/status.json` exposes checked time, capture time, record count, latest publication month and retained capture count. There is no claimed publication timestamp for the index itself because the response does not supply one.
 
-CI also tests the browser flow and mobile layout at a project subpath. Replace the
-sample assertions in `tests/browser_smoke.py` when implementing your own UI. To run
-that check locally (optional for ordinary preview):
+## Development
 
-```sh
-python3 -m venv .venv
-. .venv/bin/activate
-python3 -m pip install -r tests/browser-requirements.txt
-python3 -m playwright install --with-deps chromium
-python3 tests/browser_smoke.py
-```
-
-Playwright is a test-only dependency; the app and its static build do not use it.
-
-## Publish and register
-
-When the actual tool is ready, in the **new tool repository** set **Settings → Pages → Build and deployment →
-Source → GitHub Actions**. Push to `main`, or manually run **Browser tool · Check and
-publish** after enabling Pages. If the initial deployment ran before Pages was enabled,
-enable it and rerun. PRs only check/build and provide a downloadable preview artifact.
-
-Keep `{{VISIT_COUNTER}}` in the page head and `{{ISSUE_LINK}}` in the footer when replacing the starter UI. The build enables these for initialized CoolCode repositories. The shared counter records aggregate opens on coolcode.ca by public tool ID. Toolbox inputs and URL parameters are excluded. The issue link opens a reporting form with the tool already selected.
-
-Keep app-owned asset paths and module imports relative. Check `https://coolcode.ca/my-tool/`.
-Do not add a CNAME or set `coolcode.ca` as this project's custom domain; the account
-site supplies it. Only successful `main` builds deploy.
-
-After verifying the app, copy the reviewed object from `tool.json` into `data/tools.json`
-in [the main site](https://github.com/jsdyer/jsdyer.github.io). Each tool still builds
-independently. Update the hub record when listing metadata changes; the hub is the
-authority for discovery. Ordinary app updates touch only this repository.
-
-The main site separates **Use in your browser** from **Install yourself**. An app
-that asks for a file is still a browser tool. Standalone Linux packages should start
-in their own repositories with their own build/release workflow, rather than copying
-this browser-only scaffold. Their hub record uses `access: "install"`, links to an
-installation guide, and includes `requirements`.
-
-## Files
-
-| Path | Purpose |
-| --- | --- |
-| `tool.json` | Page metadata and a ready-to-copy catalogue record |
-| `web/` | HTML, responsive CSS, DOM interactions and separate model logic |
-| `scripts/build.py` | Escape metadata and build `web/` into `dist/` |
-| `scripts/init.py` | Set a new project's identity |
-| `tests/` | Application and builder tests |
-| `.github/workflows/pages.yml` | Check PRs and publish successful main builds |
-| `AGENTS.md` | Instructions for future coding work |
-
-Namespace optional storage as `coolcode:<tool-id>:<key>`; CoolCode paths share a
-browser origin. Don't save pasted text/uploads by default. Document external APIs
-and send only the information needed for the selected action. Never embed secrets.
-
-Scheduled refresh is opt-in. Validate source data before deploying, display its date,
-and preserve the last good deployment on failure. Public-repository schedules can
-stop after 60 days without repository activity.
-
-Templates don't propagate future edits automatically. Adopt fixes explicitly and
-consider a versioned reusable workflow once several tools confirm the shared process.
-Choose and add the intended software license before distributing a new project.
+Source lives in `web/`; the build copies it to `dist/` and adds shared CoolCode reporting links. Only the generated site is deployed, with relative assets at `/rfctrail/`. No CNAME is needed. Tests cover RFC identity validation, source namespaces, unknown fields, historical date precision, relationship direction, inverse deduplication, cycles, missing records, bounded traversal, filtered exports, expanding coverage and failed-refresh preservation. Browser CI checks the actual bundled dataset, an RFC outside the presets, relation navigation, CSV/JSON downloads and mobile overflow.

@@ -1,27 +1,42 @@
-name: Browser tool · Check and publish
+name: RFC Trail · Capture, check and publish
 on:
   pull_request:
   push:
     branches: [main]
+  schedule:
+    - cron: '47 11 * * 1'
   workflow_dispatch:
+    inputs:
+      refresh:
+        description: Refresh the official index
+        type: boolean
+        default: true
+concurrency:
+  group: rfctrail-pages-${{ github.ref }}
+  cancel-in-progress: false
 permissions:
   contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
     outputs:
       publish: ${{ steps.identity.outputs.publish }}
     steps:
       - uses: actions/checkout@v6
         with:
-          persist-credentials: false
+          persist-credentials: true
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
+      - name: Refresh the official index
+        if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.refresh)
+        run: python3 scripts/refresh.py
       - name: Test the application
         run: node --test tests/*.test.mjs
       - name: Test the builder
@@ -53,6 +68,16 @@ jobs:
           name: browser-checks
           path: browser-checks/
           retention-days: 7
+      - name: Retain validated capture
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data
+          if ! git diff --cached --quiet; then
+            git commit -m "Retain checked RFC metadata"
+            git push
+          fi
       - name: Save reviewable site
         uses: actions/upload-artifact@v4
         with:

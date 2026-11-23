@@ -1,21 +1,12 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { cleanLines } from '../web/model.mjs';
-test('trims, removes blanks and preserves first-seen order', () => {
-  assert.deepEqual(cleanLines('  Halifax\nLangley\nHalifax\n\nVancouver  '), {
-    text: 'Halifax\nLangley\nVancouver', count: 3, removed: 1,
-  });
-});
-test('supports Windows and old Mac line endings', () => {
-  assert.equal(cleanLines('a\r\nb\ra').text, 'a\nb');
-});
-test('empty text and whitespace produce an empty result', () => {
-  assert.deepEqual(cleanLines(' \n\t'), { text: '', count: 0, removed: 0 });
-});
-test('preserves case and Unicode', () => {
-  assert.equal(cleanLines('Québec\nquébec\n東京\nQuébec').text, 'Québec\nquébec\n東京');
-});
-test('treats markup as ordinary text', () => {
-  assert.equal(cleanLines('<script>alert(1)</script>\n<script>alert(1)</script>').text, '<script>alert(1)</script>');
-});
-test('rejects non-text input', () => { assert.throws(() => cleanLines(null), TypeError); });
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {gunzipSync} from 'node:zlib';import {validateCapture,filterRecords,buildGraph,trail,neighbors,compareCaptures,receipt,csv,rfcUrl} from '../web/model.mjs';
+const record=(id,extra={})=>({id,title:`Protocol ${id}`,date:'2020-01',authors:['Author'],status:'INFORMATIONAL',publicationStatus:'INFORMATIONAL',stream:'IETF',area:'',group:'',draft:'',also:[],keywords:[],updates:[],updatedBy:[],obsoletes:[],obsoletedBy:[],...extra});const cap=records=>({schema:'coolcode.rfctrail.v1',capturedAt:'2026-11-23T00:00:00Z',source:'https://www.rfc-editor.org/rfc-index.xml',records});
+test('number searches are exact and text can find authors, keywords and subseries',()=>{const rows=[record(1,{keywords:['DNS'],also:['STD13']}),record(10)];assert.deepEqual(filterRecords(rows,{query:'RFC 1'}).map(x=>x.id),[1]);assert.equal(filterRecords(rows,{query:'DNS'}).length,1);assert.equal(filterRecords(rows,{query:'author'}).length,2);assert.equal(filterRecords(rows,{query:'STD13'}).length,1);});
+test('date filters and current status are independent',()=>{const rows=[record(1,{date:'1999-01',publicationStatus:'PROPOSED STANDARD',status:'HISTORIC'}),record(2)];assert.equal(filterRecords(rows,{status:'HISTORIC',from:'1998',to:'2000'})[0].id,1);assert.throws(()=>filterRecords(rows,{from:'2020',to:'2000'}));});
+test('relationships point from updating/replacing RFC to older RFC; inverse duplicates merge',()=>{const g=buildGraph([record(1,{obsoletedBy:[2],updatedBy:[3]}),record(2,{obsoletes:[1]}),record(3,{updates:[1]})]);assert.equal(g.edges.length,2);assert.deepEqual(neighbors(g,1),{obsoletes:[],obsoletedBy:[2],updates:[],updatedBy:[3]});assert.deepEqual(g.edges.find(x=>x.type==='obsoletes'),{from:2,to:1,type:'obsoletes'});});
+test('bounded graph traversal terminates cycles and reports truncation',()=>{const g=buildGraph([record(1,{updates:[2]}),record(2,{updates:[3]}),record(3,{updates:[1,4]}),record(4)]);assert.equal(trail(g,1,{depth:3,limit:80}).ids.length,4);assert.equal(trail(g,1,{depth:3,limit:2}).truncated,true);assert.equal(trail(g,1,{kind:'obsoletes'}).ids.length,1);});
+test('missing referenced RFC is retained as a gap, not fabricated',()=>{const g=buildGraph([record(1,{updates:[99]})]);assert.deepEqual(trail(g,1).missing,[99]);assert.equal(g.byId.has(99),false);});
+test('duplicate and malformed records are rejected; historical draft punctuation retained',()=>{assert.throws(()=>validateCapture(cap([record(1),record(1)])));assert.throws(()=>validateCapture(cap([record(1,{date:'2020-99'})])));assert.equal(validateCapture(cap([record(2,{draft:'draft-example-v1.0_test-02'})])).records.length,1);});
+test('capture comparisons preserve actual changed fields and absent IDs',()=>{const diff=compareCaptures(cap([record(1),record(2)]),cap([record(1,{status:'HISTORIC'}),record(3)]));assert.deepEqual(diff,{added:[3],removed:[2],changed:[{id:1,fields:['status']}]});});
+test('receipts preserve capture date and bounded relationships',()=>{const c=cap([record(1,{updates:[2]}),record(2)]),r=receipt(c,buildGraph(c.records),1,{depth:1,limit:80});assert.equal(r.capturedAt,c.capturedAt);assert.equal(r.records.length,2);assert.equal(r.relationships[0].from,1);});
+test('CSV formula safety and safe publisher URLs',()=>{assert.match(csv([record(1,{title:'=danger'})]),/"'=danger"/);assert.equal(rfcUrl(9110),'https://www.rfc-editor.org/info/rfc9110');assert.throws(()=>rfcUrl('9110/bad'));});
+test('complete real capture is valid and expandable beyond starter topics',()=>{const index=JSON.parse(readFileSync(new URL('../web/data/index.json',import.meta.url))),data=validateCapture(JSON.parse(gunzipSync(readFileSync(new URL('../web/data/'+index.captures[0].file,import.meta.url)))));assert.equal(data.records.length,index.captures[0].recordCount);assert.ok(data.records.length>5000);assert.ok(data.records.some(r=>r.id===2324));assert.equal(filterRecords(data.records,{query:'2324'})[0].id,2324);const g=buildGraph(data.records);assert.ok(neighbors(g,9110).obsoletes.includes(7231));});

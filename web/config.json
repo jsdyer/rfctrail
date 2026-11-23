@@ -1,0 +1,18 @@
+{
+  "sourceUrl": "https://www.rfc-editor.org/rfc-index.xml",
+  "minimumRecords": 5000,
+  "maximumRecords": 30000,
+  "maximumSourceBytes": 30000000,
+  "maximumDropFraction": 0.1,
+  "retainedCaptures": 8,
+  "defaultRfc": 9110,
+  "pageSize": 30,
+  "maximumTrailNodes": 80,
+  "presets": [
+    {"label": "HTTP", "query": "HTTP", "rfc": 9110},
+    {"label": "TLS", "query": "TLS", "rfc": 8446},
+    {"label": "DNS", "query": "DNS", "rfc": 1035},
+    {"label": "QUIC", "query": "QUIC", "rfc": 9000},
+    {"label": "Internet mail", "query": "mail", "rfc": 5322}
+  ]
+}
