@@ -55,3 +55,11 @@ For reproducible parser work, `python3 scripts/refresh.py --source-file /path/to
 ## Development
 
 Source lives in `web/`; the build copies it to `dist/` and adds shared CoolCode reporting links. Only the generated site is deployed, with relative assets at `/rfctrail/`. No CNAME is needed. Tests cover RFC identity validation, source namespaces, unknown fields, historical date precision, relationship direction, inverse deduplication, cycles, missing records, bounded traversal, filtered exports, expanding coverage and failed-refresh preservation. Browser CI checks the actual bundled dataset, an RFC outside the presets, relation navigation, CSV/JSON downloads and mobile overflow.
+
+<!-- schedule-reliability -->
+## Schedule reliability
+
+Public GitHub repositories can have scheduled workflows disabled after 60 days of inactivity. A separate weekly [schedule guard](.github/workflows/schedule-guard.yml) calls GitHub's enable-workflow API for an explicit list of refresh workflows and itself. It can restore workflows disabled for inactivity, preserves manually disabled workflows, and runs independently of collection failures.
+
+This is an interim mitigation, not a scheduling guarantee: GitHub does not document active-workflow renewal as a permanent exemption, and scheduled runs can be delayed or dropped. A scheduler on our own Linux server is the planned independent trigger. The guard does not collect data, create dummy commits, or change source/check timestamps; successful collection and published data freshness still need monitoring.
+<!-- /schedule-reliability -->
